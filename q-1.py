@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[165]:
+# In[88]:
 
 
 import numpy as np
@@ -11,18 +11,19 @@ import math
 import pandas as pd
 eps = np.finfo(float).eps
 import sys
+from matplotlib.pyplot import imshow
 
 
-# In[166]:
+# In[89]:
 
 
 def sigmoid(data):
     return 1 / (1 + np.exp(np.negative(data)))
 
-# def calc_softmax(a,b=0, t=1.0):
-#     e = np.exp(a / t)
-#     ans = e / np.sum(e)
-#     return ans
+def calc_softmax(a,b=0, t=1.0):
+    e = np.exp(a / t)
+    ans = e / np.sum(e)
+    return ans
 
 def calc_convolve(data, fltr):  
     res = np.multiply(data, fltr)
@@ -35,10 +36,10 @@ def ReLU(a):
     return a * (a > 0)
 
 
-# In[167]:
+# In[90]:
 
 
-IMAGE_PATH = '/home/aishwarya/CSIS/SMAI/SMAI_assig/a-6/test.png'
+IMAGE_PATH = '/home/aishwarya/CSIS/SMAI/SMAI_assig/a-6/test_img.png'
 
 FC_Convolution_Filter_Count = 120
 POOLING_DIM = 2
@@ -86,9 +87,9 @@ def imgshow(x,name):
     img = Image.fromarray(x,'RGB')
     img = img.resize((300,300))
     img.save(name)
-#     img.show()      
 
 def calc_weights_matrix(x,y):
+#     or return np.random.randn(x,y)
     return np.random.uniform(low=-1, high=1, size=(x,y) )
 
 def calc_max_pooling(data, sze=2):#, pool_size):
@@ -106,7 +107,18 @@ def calc_max_pooling(data, sze=2):#, pool_size):
     return max_pool_result
 
 
-# In[168]:
+# In[91]:
+
+
+image = Image.open(IMAGE_PATH)
+image = image.resize((32,32), Image.ANTIALIAS)
+image.save('resized_img_32x32.png')
+
+get_ipython().magic(u'matplotlib inline')
+imshow(np.asarray(image))
+
+
+# In[103]:
 
 
 # if __name__ == '__main__':
@@ -114,9 +126,6 @@ def CNN(act_fun="sigmoid",pooling_type="max_pooling"):
     # Lenet Architectue
     # INPUT => CONV => RELU => POOL => CONV => RELU => POOL => FC(Conv) => RELU => FC
 
-    image = Image.open(IMAGE_PATH)
-    image = image.resize((32,32), Image.ANTIALIAS)
-    image.save('resized_img_32x32.png')
     
     image_array = np.array(image)
     print "Image new Dimensions: ", image_array.shape
@@ -129,12 +138,13 @@ def CNN(act_fun="sigmoid",pooling_type="max_pooling"):
     print "Filter Dimensions: ", filter_matrix.shape
     
     imgshow(filter_matrix,'1_filter_matrix.png')
-
+    plt.imshow(filter_matrix[0])
+    
     # Convolution at first layer
     convolve_res = convolution(image_array, filter_matrix)
-#     print 'type========',convolve_result.type
     print "Convolution Result Dimensions:", convolve_res.shape
     imgshow(convolve_res,'1_conv_result.png')
+#     plt.imshow(convolve_res[0])
     
     if act_fun=="ReLU":
         # Applying ReLU activation function
@@ -152,6 +162,7 @@ def CNN(act_fun="sigmoid",pooling_type="max_pooling"):
         pool_result = calc_max_pooling(relu_result, POOLING_DIM)
         imgshow(pool_result,'1_maxpool_result.png')
     print pool_result.shape , 'New image shape after 1st pooling'
+    plt.imshow(pool_result[0])
 
     # --------------Second Convolution Block-----------------------------------------
     print '\n\nSecond convolution:'
@@ -185,9 +196,7 @@ def CNN(act_fun="sigmoid",pooling_type="max_pooling"):
     print pool_result.shape , 'New image shape after 2nd pooling'
 
     # -------------------- Convolution to give Fully Connected Layer-----------------------
-    print '\n\nFully Connected Layer-----------------------'
-    
-    print '[forward propagation]\nConvolution to give Fully Connected Layer:-----------'
+    print '\n\nFully Connected Layer-----------------------[forward propagation]------------------------'
     
     input_matrix=np.array(pool_result.flatten().reshape(1, len(pool_result.flatten())))
     print 'current shape-',input_matrix.shape
@@ -206,6 +215,7 @@ def CNN(act_fun="sigmoid",pooling_type="max_pooling"):
     # -----------Layer 2- 84-----------
     input_mat=hiddn_layer1
     weight_input_hidden=calc_weights_matrix(120,84)
+#     print 'weght matr',weight_input_hidden
     hiddn_layer2=calc_matmul(input_mat, weight_input_hidden)
     j=0
     while j<  len (hiddn_layer2[0]):
@@ -221,26 +231,22 @@ def CNN(act_fun="sigmoid",pooling_type="max_pooling"):
     while k<  len (output_layer[0]):
         output_layer[0][k]=sigmoid(output_layer[0][k])
         k+=1
-
-    print '\noutput layer 3 shape-',output_layer.shape
+        
     print '\noutput layer 3 -',output_layer
+    k=0
+    while k<  len (output_layer[0]):
+        output_layer[0][k]=calc_softmax(output_layer[0][k])
+        k+=1
+
+#     softmax_result = calc_softmax(output_nn[0, 0, :])
+#     print(softmax_result)
+    print '\noutput layer 3 shape-',output_layer.shape
+    print '\nSOFTMAX:output layer 3 -',output_layer
 
 
-# In[169]:
+# In[104]:
 
 
 act_fun="ReLU"
 CNN(act_fun,pooling_type="max_pooling")
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-
 
