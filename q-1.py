@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[88]:
+# In[38]:
 
 
 import numpy as np
@@ -14,16 +14,11 @@ import sys
 from matplotlib.pyplot import imshow
 
 
-# In[89]:
+# In[39]:
 
 
 def sigmoid(data):
     return 1 / (1 + np.exp(np.negative(data)))
-
-def calc_softmax(a,b=0, t=1.0):
-    e = np.exp(a / t)
-    ans = e / np.sum(e)
-    return ans
 
 def calc_convolve(data, fltr):  
     res = np.multiply(data, fltr)
@@ -35,8 +30,17 @@ def calc_matmul(x,y):
 def ReLU(a):
     return a * (a > 0)
 
+def calc_softmax(a):
+    """Compute softmax values for each sets of scores in a."""
+#     e_x = np.exp(x - np.max(x))
+#     print 'a-',a
+    e = np.exp(a )
+#     print 'e^a=',e
+    ans = e / np.sum(e)
+    return ans
 
-# In[90]:
+
+# In[40]:
 
 
 IMAGE_PATH = '/home/aishwarya/CSIS/SMAI/SMAI_assig/a-6/test_img.png'
@@ -107,7 +111,7 @@ def calc_max_pooling(data, sze=2):#, pool_size):
     return max_pool_result
 
 
-# In[91]:
+# In[41]:
 
 
 image = Image.open(IMAGE_PATH)
@@ -118,7 +122,7 @@ get_ipython().magic(u'matplotlib inline')
 imshow(np.asarray(image))
 
 
-# In[103]:
+# In[44]:
 
 
 # if __name__ == '__main__':
@@ -210,7 +214,7 @@ def CNN(act_fun="sigmoid",pooling_type="max_pooling"):
         hiddn_layer1[0][i]=sigmoid(hiddn_layer1[0][i])
         i+=1
 
-    print '\noutput layer 1 shape-',hiddn_layer1.shape
+    print 'FC output layer 1 shape-',hiddn_layer1.shape
 
     # -----------Layer 2- 84-----------
     input_mat=hiddn_layer1
@@ -222,7 +226,7 @@ def CNN(act_fun="sigmoid",pooling_type="max_pooling"):
         hiddn_layer2[0][j]=sigmoid(hiddn_layer2[0][j])
         j+=1
 
-    print '\noutput layer 2 shape-',hiddn_layer2.shape
+    print 'FC output layer 2 shape-',hiddn_layer2.shape
 
     # -----------layer 3 -10-----------
     weight_input_hidden=calc_weights_matrix(84,10)
@@ -232,21 +236,29 @@ def CNN(act_fun="sigmoid",pooling_type="max_pooling"):
         output_layer[0][k]=sigmoid(output_layer[0][k])
         k+=1
         
-    print '\noutput layer 3 -',output_layer
-    k=0
-    while k<  len (output_layer[0]):
-        output_layer[0][k]=calc_softmax(output_layer[0][k])
-        k+=1
+    print '\nFC output layer 3 -',output_layer
+    soft_max_op=calc_softmax(output_layer[0])
+#     print 'soft_max_op=',soft_max_op
+#     k=0
+#     while k<  len (output_layer[0]):
+#         output_layer[0][k]=calc_softmax(output_layer[0])
+#         k+=1
 
 #     softmax_result = calc_softmax(output_nn[0, 0, :])
 #     print(softmax_result)
-    print '\noutput layer 3 shape-',output_layer.shape
-    print '\nSOFTMAX:output layer 3 -',output_layer
+#     print '\noutput layer 3 shape-',soft_max_op.shape
+    print '\nSOFTMAX:output layer 3 -',soft_max_op
 
 
-# In[104]:
+# In[45]:
 
 
 act_fun="ReLU"
 CNN(act_fun,pooling_type="max_pooling")
+
+
+# In[ ]:
+
+
+
 
